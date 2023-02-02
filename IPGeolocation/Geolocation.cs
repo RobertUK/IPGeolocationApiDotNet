@@ -1,10 +1,13 @@
-﻿using System;
+using System;
 using Newtonsoft.Json.Linq;
 
 namespace IPGeolocation
 {
     public class Geolocation
     {
+        private int status;
+
+        private string message;
         private String domain;
         private String ipAddress;
         private String hostname;
@@ -37,6 +40,14 @@ namespace IPGeolocation
 
         public Geolocation(JObject json)
         {
+            status = json.GetValue("status")!.ToObject<int>();
+            string text = json.GetValue("message")?.ToObject<string>();
+            if (status != 200 || text != null)
+            {
+                message = text;
+                return;
+            }
+
             JToken token = json.GetValue("domain");
             this.domain = token != null ? token.ToObject<String>() : null;
 
@@ -163,7 +174,15 @@ namespace IPGeolocation
                 this.userAgentDetail = new UserAgent(userAgentJson);
             }
         }
+        public int GetStatus()
+        {
+            return status;
+        }
 
+        public string GetMessage()
+        {
+            return message;
+        }
         public String GetDomain()
         {
             return domain;

@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Net;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.Web;
 
 namespace IPGeolocation
 {
@@ -68,6 +69,7 @@ namespace IPGeolocation
             return prepareResponseForUser(apiResponse, "timezone");
         }
 
+
         public Dictionary<String, Object> GetUserAgent(String uaString)
         {
             Dictionary<String, Object> json = new Dictionary<String, Object>();
@@ -77,6 +79,12 @@ namespace IPGeolocation
             String url = "https://api.ipgeolocation.io/user-agent?apiKey=" + apiKey;
             JObject apiResponse = GetUserAgentApiResponse(jsonStr, url);
             
+            return prepareResponseForUser(apiResponse, "useragent");
+        }
+
+        public Dictionary<String, Object> GetUserAgent(UserAgentParams userAgentParams)
+        {
+            JObject apiResponse = GetUserAgentApiResponse(userAgentParams);
             return prepareResponseForUser(apiResponse, "useragent");
         }
 
@@ -218,6 +226,29 @@ namespace IPGeolocation
             return urlParams.ToString();
         }
 
+        private String BuildUserAgentUrlParams(UserAgentParams userAgentParams)
+        {
+            StringBuilder urlParams = new StringBuilder(80);
+
+            if (userAgentParams != null)
+            {
+                if (!Strings.IsNullOrEmpty(userAgentParams.GetUserAgent()))
+                {
+                    
+
+                    Dictionary<String, Object> json = new Dictionary<String, Object>();
+                    json.Add("User-Agent", userAgentParams.GetUserAgent());
+
+                    String jsonStr = JsonConvert.SerializeObject(json);
+
+                    urlParams.Append("&header=");
+                    urlParams.Append(HttpUtility.UrlEncode(jsonStr));
+                }            
+            }
+
+            return urlParams.ToString();
+        }
+
         private JObject GetGeolocationResponse(GeolocationParams geolocationParams)
         {
             String urlParams = BuildGeolocationUrlParams(geolocationParams);
@@ -268,12 +299,47 @@ namespace IPGeolocation
             return finalResponse;
         }
 
-        private JObject GetApiResponse(String api, String urlParams)
+        private JObject GetUserAgentApiResponse(UserAgentParams userAgentParams)
+        {
+            String urlParams = BuildUserAgentUrlParams(userAgentParams);
+            return GetUserAgentApiResponse(JsonConvert.SerializeObject(userAgentParams.GetUserAgent()));
+        }
+
+        private JObject GetUserAgentApiResponse(string userAgentJson)
+        {
+            String url = "https://api.ipgeolocation.io/user-agent" + "?apiKey=" + apiKey;
+            var webrequest = HttpWebRequest.Create(url);
+            webrequest.Method = "GET";
+            webrequest.ContentType = "application/json";
+
+            webrequest.Headers.Add("user-agent", userAgentJson);         
+
+
+            HttpWebResponse webresponse = (HttpWebResponse)webrequest.GetResponse();
+            Encoding enc = System.Text.Encoding.GetEncoding("utf-8");
+            StreamReader responseStream = new StreamReader(webresponse.GetResponseStream(), enc);
+            String result = String.Empty;
+            result = responseStream.ReadToEnd();
+
+            JObject response = JObject.Parse(result);
+            response.Add("status", (int)webresponse.StatusCode);
+            webresponse.Close();
+
+            return response;
+        }
+
+        private JObject GetApiResponse(String api, String urlParams, String header = null)
         {
             String url = "https://api.ipgeolocation.io/" + api + "?" + urlParams;
             var webrequest = HttpWebRequest.Create(url);
             webrequest.Method = "GET";
             webrequest.ContentType = "application/json";
+
+            if (!String.IsNullOrEmpty(header))
+            {
+                webrequest.Headers.Add(header);
+            }
+           
             
             HttpWebResponse webresponse = (HttpWebResponse)webrequest.GetResponse();
             Encoding enc = System.Text.Encoding.GetEncoding("utf-8");
@@ -372,7 +438,6 @@ namespace IPGeolocation
 
             response.Add("status", httpStatus);
             response.Add("message", errorMessage);
-
             if (httpStatus == 200 && type.Equals("geolocation"))
             {
                 response.Add("response", new Geolocation(apiResponse));
