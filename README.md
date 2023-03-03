@@ -1,5 +1,7 @@
 # IP Geolocation API .NET SDK
 
+#Other examples based on this web service require a http post to lookup the user-agent if you don't want to pay, everything should be free right?
+
 ## Introduction
 [IPGeolocation API](https://ipgeolocation.io) is the solution to identify country code (ISO2 and ISO3 standard), country name, continent code, continent name, country capital, state/province, district, city, zip code, latitude and longitude of city, is country belongs to Europian Union, calling code, top level domain (TLD), languages, country flag, internet service provider (ISP), connection type, organization, geoname ID, currency code, currency name, time zone ID, time zone offset, current time in the time zone, is time zone in daylight saving time, total daylight savings and user agent details. This document provides important information to help you get up to speed with IPGeolocation API using IP Geolocation API C# SDK.
 
