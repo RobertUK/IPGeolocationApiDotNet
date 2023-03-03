@@ -302,7 +302,8 @@ namespace IPGeolocation
         private JObject GetUserAgentApiResponse(UserAgentParams userAgentParams)
         {
             String urlParams = BuildUserAgentUrlParams(userAgentParams);
-            return GetUserAgentApiResponse(JsonConvert.SerializeObject(userAgentParams.GetUserAgent()));
+            var x = GetUserAgentApiResponse(JsonConvert.SerializeObject(userAgentParams.GetUserAgent()));
+            return x;
         }
 
         private JObject GetUserAgentApiResponse(string userAgentJson)
@@ -438,6 +439,8 @@ namespace IPGeolocation
 
             response.Add("status", httpStatus);
             response.Add("message", errorMessage);
+            //apiResponse.Add("status", httpStatus);
+            //apiResponse.Add("message", errorMessage);
             if (httpStatus == 200 && type.Equals("geolocation"))
             {
                 response.Add("response", new Geolocation(apiResponse));
