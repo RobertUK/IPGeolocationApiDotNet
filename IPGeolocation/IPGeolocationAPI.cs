@@ -226,30 +226,6 @@ namespace IPGeolocation
 
             return urlParams.ToString();
         }
-
-        private String BuildUserAgentUrlParams(UserAgentParams userAgentParams)
-        {
-            StringBuilder urlParams = new StringBuilder(80);
-
-            if (userAgentParams != null)
-            {
-                if (!Strings.IsNullOrEmpty(userAgentParams.GetUserAgent()))
-                {
-
-
-                    Dictionary<String, Object> json = new Dictionary<String, Object>();
-                    json.Add("User-Agent", userAgentParams.GetUserAgent());
-
-                    String jsonStr = JsonConvert.SerializeObject(json);
-
-                    urlParams.Append("&header=");
-                    urlParams.Append(HttpUtility.UrlEncode(jsonStr));
-                }
-            }
-
-            return urlParams.ToString();
-        }
-
         private JObject GetGeolocationResponse(GeolocationParams geolocationParams)
         {
             String urlParams = BuildGeolocationUrlParams(geolocationParams);
@@ -300,12 +276,7 @@ namespace IPGeolocation
             return finalResponse;
         }
 
-        private JObject GetUserAgentApiResponse(UserAgentParams userAgentParams)
-        {
-            String urlParams = BuildUserAgentUrlParams(userAgentParams);
-            var x = GetUserAgentApiResponse(JsonConvert.SerializeObject(userAgentParams.GetUserAgent()));
-            return x;
-        }
+
 
         private JObject GetUserAgentApiResponse(string userAgentJson)
         {
